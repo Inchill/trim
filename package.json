@@ -7,8 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "build": "rollup -c",
-    "prepare": "husky"
+    "build": "NODE_ENV=production rollup -c",
+    "dev": "rollup -c -w"
   },
   "engines": {
     "node": ">=18.x"
@@ -17,6 +17,7 @@
     "*.{js,ts}": "eslint --fix --ignore-path .gitignore",
     "*.{cjs,css,html,js,json,html,md,ts,yml,yaml}": "prettier --write --ignore-path .gitignore"
   },
+  "typings": "types/index.d.ts",
   "keywords": [
     "trim",
     "image-editor",
@@ -25,6 +26,7 @@
   "author": "Inchill",
   "license": "MIT",
   "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.4",
     "@typescript-eslint/eslint-plugin": "^7.3.1",
     "@typescript-eslint/parser": "^7.3.1",
     "eslint": "^8.57.0",
@@ -32,7 +34,11 @@
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "rollup": "^4.13.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-serve": "^1.1.1",
     "rollup-plugin-typescript2": "^0.36.0",
+    "stylus": "^0.63.0",
     "typescript": "^5.4.3"
   }
 }

@@ -1,0 +1,38 @@
+.trim-nav-tools
+    display flex;
+    justify-content space-between;
+    align-items center;
+    position relative;
+    z-index 1;
+    height 40px;
+    padding 10px 10px 0;
+    box-sizing border-box;
+
+    > button
+        padding 0;
+        margin 0;
+        border none;
+        background transparent;
+        color inherit;
+        font-size inherit;
+        font-family inherit;
+        line-height inherit;
+        width auto;
+        border-radius 50%;
+        text-decoration none;
+
+        > span
+            display flex;
+            justify-content center;
+            align-items center;
+            width 24px;
+            height 24px;
+            border-radius 50%;
+
+.trim-nav-done > span
+    background url('../svg/confirm.svg') no-repeat center / 16px 16px;
+    background-color #ffd843;
+
+.trim-nav-close > span
+    background url('../svg/cancel.svg') no-repeat center / 16px 16px;
+    border 1px solid #ddd;
