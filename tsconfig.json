@@ -3,8 +3,7 @@
         "module": "ESNext",
         "target": "ESNext",
         "lib": ["ESNext", "DOM"],
-        "strict": true,
-        "moduleResolution": "node"
+        "strict": true
     },
     "include": [
         "src/**/*",

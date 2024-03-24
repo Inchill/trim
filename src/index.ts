@@ -1,3 +1,4 @@
 export const twoSum = (a: number, b: number) => {
-    return a + b;
-}
+	console.log(1);
+	return a + b;
+};
