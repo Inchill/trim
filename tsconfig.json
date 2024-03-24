@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ESNext",
+        "lib": ["ESNext", "DOM"],
+        "strict": true,
+        "moduleResolution": "node"
+    },
+    "include": [
+        "src/**/*",
+        "rollup.config.js"
+      ],
+      "exclude": [
+        "node_modules"
+    ]
+}
+  
