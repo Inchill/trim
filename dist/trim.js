@@ -1,8 +1,145 @@
+
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.trim = {}));
 })(this, (function (exports) { 'use strict';
+
+  const warn = (message) => console.warn(message);
+
+  let AreaSelect$1 = class AreaSelect {
+      rect;
+      options = {
+          x: 0,
+          y: 0,
+          width: 0,
+          height: 0,
+          minWidth: 40,
+          minHeight: 30
+      };
+      isResizing = false;
+      callbackMap = {
+          afterChange: [],
+          change: []
+      };
+      constructor(el, options) {
+          el = typeof el === 'string' ? document.querySelector(el) : el;
+          if (!el) {
+              warn('el is required');
+              return;
+          }
+          if (!options) {
+              warn('options is required');
+              return;
+          }
+          this.rect = el;
+          this.options = Object.assign(this.options, options);
+          this.initStyle();
+          this.bindEvent();
+      }
+      on(eventName, callback) {
+          this.callbackMap[eventName].push(callback);
+      }
+      trigger(eventName, params) {
+          const callbacks = this.callbackMap[eventName];
+          callbacks.forEach(cb => cb(params));
+      }
+      initStyle() {
+          const { x, y, width, height } = this.options;
+          this.rect.style.cssText = `
+        left: ${x}px;
+        top: ${y}px;
+        width: ${width}px;
+        height: ${height}px;
+    `;
+      }
+      bindEvent() {
+          if (!this.rect)
+              return;
+          this.rect.addEventListener('touchstart', this.onTouchStart.bind(this));
+          this.rect.addEventListener('touchmove', this.onTouchMove.bind(this));
+          this.rect.addEventListener('touchend', this.onTouchEnd.bind(this));
+          this.rect.addEventListener('touchcancel', this.onTouchCancel.bind(this));
+      }
+      onTouchStart(event) {
+          const { classList } = event.target;
+          if (!classList.contains('drag-button'))
+              return;
+          this.isResizing = true;
+      }
+      onTouchMove(event) {
+          const { classList } = event.target;
+          if (!classList.contains('drag-button'))
+              return;
+          if (!this.isResizing)
+              return;
+          const { width, height, x, y } = this.rect.getBoundingClientRect();
+          const isTopButton = classList.contains('drag-button-top');
+          const isRightButton = classList.contains('drag-button-right');
+          const isBottomButton = classList.contains('drag-button-bottom');
+          const isLeftButton = classList.contains('drag-button-left');
+          let deltaX = 0;
+          let deltaY = 0;
+          let newWidth = width;
+          let newHeight = height;
+          let newX = x;
+          let newY = y;
+          if (isTopButton) { // 更新矩形左上角横纵坐标
+              deltaX = event.touches[0].clientX - this.options.x;
+              deltaY = event.touches[0].clientY - this.options.y;
+              newWidth = this.options.width - deltaX;
+              newHeight = this.options.height - deltaY;
+              newX = event.touches[0].clientX;
+              newY = event.touches[0].clientY;
+          }
+          else if (isBottomButton) { // 不更新矩形左上角坐标
+              deltaX = event.touches[0].clientX - (this.options.x + this.options.width);
+              deltaY = event.touches[0].clientY - (this.options.y + this.options.height);
+              newWidth = this.options.width + deltaX;
+              newHeight = this.options.height + deltaY;
+          }
+          else if (isLeftButton) { // 更新矩形左上角横纵坐标
+              deltaX = event.touches[0].clientX - this.options.x;
+              deltaY = event.touches[0].clientY - this.options.y - this.options.height;
+              newWidth = this.options.width - deltaX;
+              newHeight = this.options.height + deltaY;
+              newX = event.touches[0].clientX;
+              newY = event.touches[0].clientY - newHeight;
+          }
+          else if (isRightButton) { // 更新矩形左上角横纵坐标
+              deltaX = event.touches[0].clientX - (this.options.x + this.options.width);
+              deltaY = event.touches[0].clientY - this.options.y;
+              newWidth = this.options.width + deltaX;
+              newHeight = this.options.height - deltaY;
+              newY = event.touches[0].clientY;
+          }
+          this.rect.style.cssText = `
+        left: ${newX}px;
+        top: ${newY}px;
+        width: ${newWidth}px;
+        height: ${newHeight}px;
+    `;
+          this.trigger('change', { x: newX, y: newY, width: newWidth, height: newHeight });
+      }
+      onTouchEnd(event) {
+          const { classList } = event.target;
+          if (!classList.contains('drag-button'))
+              return;
+          this.isResizing = false;
+          const { width, height, x, y } = this.rect.getBoundingClientRect();
+          this.options = { x, y, width, height };
+          this.trigger('afterChange', { ...this.options });
+      }
+      onTouchCancel(event) {
+          const { classList } = event.target;
+          if (!classList.contains('drag-button'))
+              return;
+          this.isResizing = false;
+          const { width, height, x, y } = this.rect.getBoundingClientRect();
+          this.options = { x, y, width, height };
+      }
+  };
 
   const imgRectMargin = 20;
   const img = new Image();
@@ -31,6 +168,27 @@
           rectX = (canvasWidth - rectWidth) / 2;
           rectY = (canvasHeight - rectHeight) / 2 - imgRectMargin * 2;
           drawImageWithScale(canvas, img);
+          const rectangle = document.getElementById('rectangle');
+          const areaSelect = new AreaSelect$1(rectangle, {
+              x: rectX,
+              y: rectY,
+              width: rectWidth,
+              height: rectHeight
+          });
+          areaSelect.on('change', (params) => {
+              rectX = params.x;
+              rectY = params.y;
+              rectWidth = params.width;
+              rectHeight = params.height;
+              drawImageWithScale(canvas, img);
+          });
+          areaSelect.on('afterChange', (params) => {
+              rectX = params.x;
+              rectY = params.y;
+              rectWidth = params.width;
+              rectHeight = params.height;
+              drawImageWithScale(canvas, img);
+          });
           // 设置手势缩放
           // setupGesture(canvas, img);
           // 设置裁剪区域
@@ -66,8 +224,6 @@
       // 绘制矩形区域裁剪的图像
       ctx.putImageData(imageData, rectX, rectY);
   }
-
-  const warn = (message) => console.warn(message);
 
   var Nav = () => `
     <div class="trim-nav-tools">

@@ -1,3 +1,5 @@
+import AreaSelect from '../area-select';
+
 const imgRectMargin = 20;
 const img = new Image();
 let rectX = 0,
@@ -34,6 +36,30 @@ export const drawImage = (src: string) => {
     rectY = (canvasHeight - rectHeight) / 2 - imgRectMargin * 2;
 
     drawImageWithScale(canvas, img);
+
+    const rectangle = document.getElementById('rectangle');
+    const areaSelect = new AreaSelect(rectangle, {
+      x: rectX,
+      y: rectY,
+      width: rectWidth,
+      height: rectHeight
+    });
+
+    areaSelect.on('change', (params) => {
+      rectX = params.x;
+      rectY = params.y;
+      rectWidth = params.width;
+      rectHeight = params.height;
+      drawImageWithScale(canvas, img);
+    });
+
+    areaSelect.on('afterChange', (params) => {
+      rectX = params.x;
+      rectY = params.y;
+      rectWidth = params.width;
+      rectHeight = params.height;
+      drawImageWithScale(canvas, img);
+    });
 
     // 设置手势缩放
     // setupGesture(canvas, img);

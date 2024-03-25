@@ -8,7 +8,8 @@
     "paths": {
       "@src/*": ["src/*"]
     },
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "typeRoots": ["types"]
   },
   "include": ["src/**/*", "rollup.config.js"],
   "exclude": ["node_modules"]

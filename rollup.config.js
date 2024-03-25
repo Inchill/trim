@@ -1,6 +1,7 @@
 import typescript from 'rollup-plugin-typescript2';
 import babel from '@rollup/plugin-babel';
 import postcss from 'rollup-plugin-postcss';
+import terser from '@rollup/plugin-terser';
 import livereload from 'rollup-plugin-livereload';
 import serve from 'rollup-plugin-serve';
 
@@ -23,6 +24,13 @@ const devPlugins = [
   })
 ];
 
+const prodPlugins = [
+  terser({
+    compress: true,
+    mangle: true
+  })
+];
+
 export default {
   input: 'src/index.ts',
   output: {
@@ -40,6 +48,7 @@ export default {
       extract: true, // 提取 CSS 文件
       minimize: !isDev // 生产模式下压缩 CSS
     }),
+    ...(isDev ? [] : prodPlugins),
     ...(isDev ? devPlugins : [])
   ]
 };

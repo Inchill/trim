@@ -1,0 +1,30 @@
+#rectangle
+    position absolute
+    border 1px solid black
+    box-sizing border-box
+    z-index 1
+    cursor nwse-resize /* 指定鼠标样式为可改变大小的角落 */
+
+.drag-button
+    position absolute
+    width 20px
+    height 20px
+    border-radius 50%
+    background-color black
+    transform translate(-50%, -50%)
+
+    &-top
+        left 0
+        top 0
+    &-right
+        right 0
+        top 0
+        transform translate(50%, -50%)
+    &-bottom
+        right 0
+        bottom 0
+        transform translate(50%, 50%)
+    &-left
+        left 0
+        bottom 0
+        transform translate(-50%, 50%)

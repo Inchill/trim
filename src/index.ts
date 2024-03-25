@@ -1,4 +1,4 @@
-import { IOptions } from '../types';
+import { IOptions } from 'types';
 import { drawImage } from './canvas';
 import { warn } from './utils';
 import { createTrimImageEditorUI } from './ui';
