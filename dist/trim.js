@@ -38,12 +38,17 @@
           this.initStyle();
           this.bindEvent();
       }
+      /**
+       * register event listener
+       * @param eventName
+       * @param callback
+       */
       on(eventName, callback) {
           this.callbackMap[eventName].push(callback);
       }
       trigger(eventName, params) {
           const callbacks = this.callbackMap[eventName];
-          callbacks.forEach(cb => cb(params));
+          callbacks.forEach((cb) => cb(params));
       }
       initStyle() {
           const { x, y, width, height } = this.options;
@@ -85,7 +90,8 @@
           let newHeight = height;
           let newX = x;
           let newY = y;
-          if (isTopButton) { // 更新矩形左上角横纵坐标
+          if (isTopButton) {
+              // 更新矩形左上角横纵坐标
               deltaX = event.touches[0].clientX - this.options.x;
               deltaY = event.touches[0].clientY - this.options.y;
               newWidth = this.options.width - deltaX;
@@ -93,13 +99,16 @@
               newX = event.touches[0].clientX;
               newY = event.touches[0].clientY;
           }
-          else if (isBottomButton) { // 不更新矩形左上角坐标
+          else if (isBottomButton) {
+              // 不更新矩形左上角坐标
               deltaX = event.touches[0].clientX - (this.options.x + this.options.width);
-              deltaY = event.touches[0].clientY - (this.options.y + this.options.height);
+              deltaY =
+                  event.touches[0].clientY - (this.options.y + this.options.height);
               newWidth = this.options.width + deltaX;
               newHeight = this.options.height + deltaY;
           }
-          else if (isLeftButton) { // 更新矩形左上角横纵坐标
+          else if (isLeftButton) {
+              // 更新矩形左上角横纵坐标
               deltaX = event.touches[0].clientX - this.options.x;
               deltaY = event.touches[0].clientY - this.options.y - this.options.height;
               newWidth = this.options.width - deltaX;
@@ -107,7 +116,8 @@
               newX = event.touches[0].clientX;
               newY = event.touches[0].clientY - newHeight;
           }
-          else if (isRightButton) { // 更新矩形左上角横纵坐标
+          else if (isRightButton) {
+              // 更新矩形左上角横纵坐标
               deltaX = event.touches[0].clientX - (this.options.x + this.options.width);
               deltaY = event.touches[0].clientY - this.options.y;
               newWidth = this.options.width + deltaX;
@@ -120,7 +130,12 @@
         width: ${newWidth}px;
         height: ${newHeight}px;
     `;
-          this.trigger('change', { x: newX, y: newY, width: newWidth, height: newHeight });
+          this.trigger('change', {
+              x: newX,
+              y: newY,
+              width: newWidth,
+              height: newHeight
+          });
       }
       onTouchEnd(event) {
           const { classList } = event.target;

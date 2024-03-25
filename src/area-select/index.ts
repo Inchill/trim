@@ -36,6 +36,11 @@ export default class AreaSelect {
     this.bindEvent();
   }
 
+  /**
+   * register event listener
+   * @param eventName
+   * @param callback
+   */
   public on(eventName: EventName, callback: Callback) {
     this.callbackMap[eventName].push(callback);
   }
