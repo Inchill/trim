@@ -1,7 +1,9 @@
 import { Options, EventName, CallbackMap, Callback, Params } from './base';
 import { warn } from '@src/utils';
 
-export default class AreaSelect {
+export { Params } from './base';
+
+export class AreaSelect {
   public rect;
   private options: Options = {
     x: 0,
