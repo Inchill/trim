@@ -161,6 +161,7 @@
   let rectX = 0, rectY = 0, rectWidth = 0, rectHeight = 0;
   const translateX = 0;
   const translateY = 0;
+  let scale = 1;
   const drawImage = (src) => {
       const canvas = document.querySelector('.trim-edit-canvas')
           ?.children[0];
@@ -181,8 +182,9 @@
           rectHeight = rectWidth * (img.height / img.width);
           // 计算矩形区域的位置，使其在画布中央显示，并且距离画布边缘有间距
           rectX = (canvasWidth - rectWidth) / 2;
-          rectY = (canvasHeight - rectHeight) / 2 - imgRectMargin * 2;
-          drawImageWithScale(canvas, img);
+          rectY = (canvasHeight - rectHeight) / 2;
+          scale = rectWidth / img.width + 0.3;
+          drawImageWithScale(canvas, img, scale);
           const rectangle = document.getElementById('rectangle');
           const areaSelect = new AreaSelect$1(rectangle, {
               x: rectX,
@@ -195,14 +197,14 @@
               rectY = params.y;
               rectWidth = params.width;
               rectHeight = params.height;
-              drawImageWithScale(canvas, img);
+              drawImageWithScale(canvas, img, scale);
           });
           areaSelect.on('afterChange', (params) => {
               rectX = params.x;
               rectY = params.y;
               rectWidth = params.width;
               rectHeight = params.height;
-              drawImageWithScale(canvas, img);
+              drawImageWithScale(canvas, img, scale);
           });
           // 设置手势缩放
           // setupGesture(canvas, img);
