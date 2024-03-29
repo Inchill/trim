@@ -9,7 +9,8 @@
       "@src/*": ["src/*"]
     },
     "moduleResolution": "Node",
-    "typeRoots": ["types"]
+    "typeRoots": ["types"],
+    "noImplicitThis": false
   },
   "include": ["src/**/*", "rollup.config.js"],
   "exclude": ["node_modules"]

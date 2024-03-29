@@ -1,5 +1,5 @@
 import { Options, EventName, CallbackMap, Callback, Params } from './base';
-import { warn } from '@src/utils';
+import { warn, throttle, getScreenRefreshTime } from '@src/utils';
 
 export { Params } from './base';
 
@@ -62,11 +62,16 @@ export class AreaSelect {
     `;
   }
 
-  private bindEvent() {
+  private async bindEvent() {
     if (!this.rect) return;
 
+    const refreshTime = await getScreenRefreshTime();
+    document.querySelector('#loader-wrapper')?.classList.add('hidden');
     this.rect.addEventListener('touchstart', this.onTouchStart.bind(this));
-    this.rect.addEventListener('touchmove', this.onTouchMove.bind(this));
+    this.rect.addEventListener(
+      'touchmove',
+      throttle(this.onTouchMove.bind(this), refreshTime)
+    );
     this.rect.addEventListener('touchend', this.onTouchEnd.bind(this));
     this.rect.addEventListener('touchcancel', this.onTouchCancel.bind(this));
   }
