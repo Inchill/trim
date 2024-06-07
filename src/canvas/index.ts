@@ -1,4 +1,4 @@
-import { AreaSelect, Params } from '../area-select'
+import { Params, AreaSelect } from '../area-select'
 
 const imgRectMargin = 20
 const img = new Image()
@@ -62,7 +62,7 @@ export const drawImage = (src: string) => {
     areaSelect.on('afterChange', onAreaSelectChange)
 
     // 设置手势缩放
-    // setupGesture(canvas, img);
+    setupGesture(canvas, img)
 
     // 设置裁剪区域
     // setupCropArea()
@@ -100,7 +100,7 @@ function drawImageWithScale (
   // 绘制图片
   ctx.drawImage(image, dx, dy, imgWidth, imgHeight)
 
-  // 获取矩形区域图像数据
+  // 获取矩形区域图像数据(TODO: 频繁读取会造成性能问题，最好是在矩形区域再次绘制选定图片区域)
   const imageData = ctx.getImageData(rectX, rectY, rectWidth, rectHeight)
 
   // 添加蒙层
@@ -109,4 +109,43 @@ function drawImageWithScale (
 
   // 绘制矩形区域裁剪的图像
   ctx.putImageData(imageData, rectX, rectY)
+}
+
+function setupGesture (canvas: HTMLCanvasElement, img: HTMLImageElement) {
+  const target = document.querySelector('.area-select-box') as HTMLElement
+
+  if (!target) return
+
+  const onWheel = (event: WheelEvent) => {
+    const { classList } = event.target as HTMLElement
+    if (classList.contains('drag-button')) return
+
+    if (!event.deltaY || !event.ctrlKey) return
+    if (!checkInRect(event.clientX, event.clientY)) return
+    event.preventDefault()
+
+    scale += event.deltaY * -0.01
+
+    // Restrict scale
+    const minScale = 0.125
+    const maxScale = 4
+    scale = Math.min(Math.max(minScale, scale), maxScale)
+
+    drawImageWithScale(canvas, img, scale)
+  }
+
+  target.addEventListener('wheel', onWheel, { passive: false })
+}
+
+const checkInRect = (x: number, y: number) => {
+  if (
+    x < rectX ||
+    x > rectX + rectWidth ||
+    y < rectY ||
+    y > rectY + rectHeight
+  ) {
+    return false
+  }
+
+  return true
 }

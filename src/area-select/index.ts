@@ -55,10 +55,10 @@ export class AreaSelect {
   private initStyle () {
     const { x, y, width, height } = this.options
     this.rect!.style.cssText = `
-        left: ${x}px;
-        top: ${y}px;
-        width: ${width}px;
-        height: ${height}px;
+      left: ${x}px;
+      top: ${y}px;
+      width: ${width}px;
+      height: ${height}px;
     `
   }
 
@@ -68,7 +68,7 @@ export class AreaSelect {
     this.rect.addEventListener('touchstart', this.onTouchStart.bind(this))
     this.rect.addEventListener(
       'touchmove',
-      throttle(this.onTouchMove.bind(this), 16.7)
+      throttle(this.onTouchMove.bind(this), 0)
     )
     this.rect.addEventListener('touchend', this.onTouchEnd.bind(this))
     this.rect.addEventListener('touchcancel', this.onTouchCancel.bind(this))
@@ -85,100 +85,145 @@ export class AreaSelect {
     if (!classList.contains('drag-button')) return
     if (!this.isResizing) return
 
-    const { minWidth = 80, minHeight = 60 } = this.options
     const { clientX, clientY } = event.touches[0]
     const { width, height, x, y } = this.rect!.getBoundingClientRect()
-    const isTopButton = classList.contains('drag-button-top')
-    const isRightButton = classList.contains('drag-button-right')
-    const isBottomButton = classList.contains('drag-button-bottom')
-    const isLeftButton = classList.contains('drag-button-left')
 
-    let deltaX = 0
-    let deltaY = 0
-    let newWidth = width
-    let newHeight = height
-    let newX = x
-    let newY = y
+    if (classList.contains('drag-button-top')) {
+      this.resizeTop(clientX, clientY, x, y, width, height)
+    } else if (classList.contains('drag-button-bottom')) {
+      this.resizeBottom(clientX, clientY, x, y, width, height)
+    } else if (classList.contains('drag-button-left')) {
+      this.resizeLeft(clientX, clientY, x, y, width, height)
+    } else if (classList.contains('drag-button-right')) {
+      this.resizeRight(clientX, clientY, x, y, width, height)
+    }
+  }
 
-    if (isTopButton) {
-      // 更新矩形左上角
-      deltaX = clientX - this.options.x
-      deltaY = clientY - this.options.y
-      newWidth = this.options.width - deltaX
-      newHeight = this.options.height - deltaY
-      newX = clientX
-      newY = clientY
+  private resizeTop (
+    clientX: number,
+    clientY: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    const { minWidth = 80, minHeight = 60 } = this.options
+    let deltaX = clientX - this.options.x
+    let deltaY = clientY - this.options.y
+    let newWidth = this.options.width - deltaX
+    let newHeight = this.options.height - deltaY
+    let newX = clientX
+    let newY = clientY
 
-      // 检查是否达到最小宽度和高度
-      if (newWidth < minWidth) {
-        newWidth = minWidth
-        deltaX = this.options.width - minWidth
-        newX = this.options.x + deltaX
-      }
-      if (newHeight < minHeight) {
-        newHeight = minHeight
-        deltaY = this.options.height - minHeight
-        newY = this.options.y + deltaY
-      }
-    } else if (isBottomButton) {
-      // 更新矩形右下角
-      deltaX = clientX - (this.options.x + this.options.width)
-      deltaY = clientY - (this.options.y + this.options.height)
-      newWidth = this.options.width + deltaX
-      newHeight = this.options.height + deltaY
+    if (newWidth < minWidth) {
+      newWidth = minWidth
+      deltaX = this.options.width - minWidth
+      newX = this.options.x + deltaX
+    }
+    if (newHeight < minHeight) {
+      newHeight = minHeight
+      deltaY = this.options.height - minHeight
+      newY = this.options.y + deltaY
+    }
 
-      // 检查是否达到最小宽度和高度
-      if (newWidth < minWidth) {
-        newWidth = minWidth
-      }
-      if (newHeight < minHeight) {
-        newHeight = minHeight
-      }
-    } else if (isLeftButton) {
-      // 更新矩形左下角
-      deltaX = clientX - this.options.x
-      deltaY = clientY - this.options.y - this.options.height
-      newWidth = this.options.width - deltaX
-      newHeight = this.options.height + deltaY
-      newX = clientX
-      newY = clientY - newHeight
+    this.updateRect(newX, newY, newWidth, newHeight)
+  }
 
-      // 检查是否达到最小宽度和高度
-      if (newWidth < minWidth) {
-        newWidth = minWidth
-        deltaX = this.options.width - minWidth
-        newX = this.options.x + deltaX
-      }
-      if (newHeight < minHeight) {
-        newHeight = minHeight
-        deltaY = this.options.height - minHeight
-        newY = this.options.y + deltaY
-        console.log(newY)
-      }
-    } else if (isRightButton) {
-      // 更新矩形右上角
-      deltaX = clientX - (this.options.x + this.options.width)
-      deltaY = clientY - this.options.y
-      newWidth = this.options.width + deltaX
-      newHeight = this.options.height - deltaY
-      newY = clientY
+  private resizeBottom (
+    clientX: number,
+    clientY: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    const { minWidth = 80, minHeight = 60 } = this.options
+    const deltaX = clientX - (this.options.x + this.options.width)
+    const deltaY = clientY - (this.options.y + this.options.height)
+    let newWidth = this.options.width + deltaX
+    let newHeight = this.options.height + deltaY
 
-      // 检查是否达到最小宽度和高度
-      if (newWidth < minWidth) {
-        newWidth = minWidth
-      }
-      if (newHeight < minHeight) {
-        newHeight = minHeight
-        deltaY = this.options.height - minHeight
-        newY = this.options.y + deltaY
+    if (newWidth < minWidth) {
+      newWidth = minWidth
+    }
+    if (newHeight < minHeight) {
+      newHeight = minHeight
+    }
+
+    this.updateRect(x, y, newWidth, newHeight)
+  }
+
+  private resizeLeft (
+    clientX: number,
+    clientY: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    const { minWidth = 80, minHeight = 60 } = this.options
+    let deltaX = clientX - this.options.x
+    let deltaY = clientY - (this.options.y + this.options.height)
+    let newWidth = this.options.width - deltaX
+    let newHeight = this.options.height + deltaY
+    let newX = clientX
+    let newY = clientY - newHeight
+
+    if (newWidth < minWidth) {
+      newWidth = minWidth
+      deltaX = this.options.width - minWidth
+      newX = this.options.x + deltaX
+    }
+    if (newHeight < minHeight) {
+      newHeight = minHeight
+      deltaY = this.options.height - minHeight
+      newY = this.options.y + deltaY
+      if (clientY - this.options.y < minHeight) {
+        newY = this.options.y
       }
     }
 
+    this.updateRect(newX, newY, newWidth, newHeight)
+  }
+
+  private resizeRight (
+    clientX: number,
+    clientY: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    const { minWidth = 80, minHeight = 60 } = this.options
+    const deltaX = clientX - (this.options.x + this.options.width)
+    let deltaY = clientY - this.options.y
+    let newWidth = this.options.width + deltaX
+    let newHeight = this.options.height - deltaY
+    let newY = clientY
+
+    if (newWidth < minWidth) {
+      newWidth = minWidth
+    }
+    if (newHeight < minHeight) {
+      newHeight = minHeight
+      deltaY = this.options.height - minHeight
+      newY = this.options.y + deltaY
+    }
+
+    this.updateRect(x, newY, newWidth, newHeight)
+  }
+
+  private updateRect (
+    newX: number,
+    newY: number,
+    newWidth: number,
+    newHeight: number
+  ) {
     this.rect!.style.cssText = `
-        left: ${newX}px;
-        top: ${newY}px;
-        width: ${newWidth}px;
-        height: ${newHeight}px;
+      left: ${newX}px;
+      top: ${newY}px;
+      width: ${newWidth}px;
+      height: ${newHeight}px;
     `
     this.trigger('change', {
       x: newX,
