@@ -8,6 +8,7 @@ export const createTrimImageEditorUI = () => `
     <div class="trim-root-wrapper">
         ${Nav()}
         ${Toolbar()}
+        ${AreaSelect()}
         ${Canvas()}
         ${Loading()}
     </div>

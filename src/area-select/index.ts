@@ -82,10 +82,7 @@ export class AreaSelect {
     if (!this.rect) return
 
     this.rect.addEventListener('touchstart', this.onTouchStart.bind(this))
-    this.rect.addEventListener(
-      'touchmove',
-      throttle(this.onTouchMove.bind(this), 0)
-    )
+    this.rect.addEventListener('touchmove', this.onTouchMove.bind(this))
     this.rect.addEventListener('touchend', this.onTouchEnd.bind(this))
     this.rect.addEventListener('touchcancel', this.onTouchCancel.bind(this))
     this.rect.addEventListener('wheel', this.onWheel.bind(this))
@@ -93,14 +90,21 @@ export class AreaSelect {
 
   private onTouchStart (event: TouchEvent) {
     const { classList } = event.target as HTMLElement
-    if (!classList.contains('drag-button')) return
+    if (!classList.contains('drag-button')) {
+      this.dispatchEventToCanvas(event)
+      return
+    }
     this.isResizing = true
   }
 
   // 监听触摸移动
   private onTouchMove (event: TouchEvent) {
     const { classList } = event.target as HTMLElement
-    if (!classList.contains('drag-button')) return
+    // 矩形区域移动或者缩放事件透传
+    if (!classList.contains('drag-button')) {
+      this.dispatchEventToCanvas(event)
+      return
+    }
     if (!this.isResizing) return
 
     const { clientX, clientY } = event.touches[0]
@@ -117,6 +121,32 @@ export class AreaSelect {
     }
   }
 
+  private onTouchEnd (event: TouchEvent) {
+    const { classList } = event.target as HTMLElement
+    if (!classList.contains('drag-button')) {
+      this.dispatchEventToCanvas(event)
+      return
+    }
+
+    this.isResizing = false
+    const { width, height, x, y } = this.rect!.getBoundingClientRect()
+    this.options = { ...this.options, x, y, width, height }
+    this.trigger('afterChange', { ...this.options })
+  }
+
+  private onTouchCancel (event: TouchEvent) {
+    const { classList } = event.target as HTMLElement
+    if (!classList.contains('drag-button')) {
+      this.dispatchEventToCanvas(event)
+      return
+    }
+
+    this.isResizing = false
+    const { width, height, x, y } = this.rect!.getBoundingClientRect()
+    this.options = { ...this.options, x, y, width, height }
+  }
+
+  // 左上角
   private resizeTop (
     clientX: number,
     clientY: number,
@@ -147,6 +177,7 @@ export class AreaSelect {
     this.updateRect(newX, newY, newWidth, newHeight)
   }
 
+  // 右下角
   private resizeBottom (
     clientX: number,
     clientY: number,
@@ -171,6 +202,7 @@ export class AreaSelect {
     this.updateRect(x, y, newWidth, newHeight)
   }
 
+  // 左下角
   private resizeLeft (
     clientX: number,
     clientY: number,
@@ -204,6 +236,7 @@ export class AreaSelect {
     this.updateRect(newX, newY, newWidth, newHeight)
   }
 
+  // 右上角
   private resizeRight (
     clientX: number,
     clientY: number,
@@ -251,27 +284,6 @@ export class AreaSelect {
     })
   }
 
-  private onTouchEnd (event: TouchEvent) {
-    const { classList } = event.target as HTMLElement
-    if (!classList.contains('drag-button')) return
-
-    this.isResizing = false
-    const { width, height, x, y } = this.rect!.getBoundingClientRect()
-    this.options = { ...this.options, x, y, width, height }
-    this.trigger('afterChange', { ...this.options })
-  }
-
-  private onTouchCancel (event: TouchEvent) {
-    const { classList } = event.target as HTMLElement
-    if (!classList.contains('drag-button')) return
-
-    this.isResizing = false
-    const { width, height, x, y } = this.rect!.getBoundingClientRect()
-    this.options = { ...this.options, x, y, width, height }
-  }
-
-  private getMinRect () {}
-
   // 检查坐标是否在矩形区域内
   private checkInRect (x: number, y: number) {
     if (
@@ -300,5 +312,72 @@ export class AreaSelect {
     const maxScale = 4
     this.scale = Math.min(Math.max(minScale, this.scale), maxScale)
     this.trigger('zoom', { scale: this.scale })
+  }
+
+  private dispatchEventToCanvas (event: TouchEvent) {
+    // 如果是在矩形区域内的 touch 事件，需要派发给底层 canvas 画布
+    const canvas = document.querySelector('.trim-edit-canvas')
+      ?.children[0] as HTMLCanvasElement
+    if (!canvas) return
+
+    const touches = Array.from(event.touches).map(
+      (t) =>
+        new Touch({
+          identifier: t.identifier,
+          target: canvas,
+          clientX: t.clientX,
+          clientY: t.clientY,
+          screenX: t.screenX,
+          screenY: t.screenY,
+          pageX: t.pageX,
+          pageY: t.pageY,
+          radiusX: t.radiusX,
+          radiusY: t.radiusY,
+          rotationAngle: t.rotationAngle,
+          force: t.force
+        })
+    )
+    const targetTouches = Array.from(event.targetTouches).map(
+      (t) =>
+        new Touch({
+          identifier: t.identifier,
+          target: canvas,
+          clientX: t.clientX,
+          clientY: t.clientY,
+          screenX: t.screenX,
+          screenY: t.screenY,
+          pageX: t.pageX,
+          pageY: t.pageY,
+          radiusX: t.radiusX,
+          radiusY: t.radiusY,
+          rotationAngle: t.rotationAngle,
+          force: t.force
+        })
+    )
+    const changedTouches = Array.from(event.changedTouches).map(
+      (t) =>
+        new Touch({
+          identifier: t.identifier,
+          target: canvas,
+          clientX: t.clientX,
+          clientY: t.clientY,
+          screenX: t.screenX,
+          screenY: t.screenY,
+          pageX: t.pageX,
+          pageY: t.pageY,
+          radiusX: t.radiusX,
+          radiusY: t.radiusY,
+          rotationAngle: t.rotationAngle,
+          force: t.force
+        })
+    )
+    const canvasEvent = new TouchEvent(event.type, {
+      bubbles: true,
+      cancelable: true,
+      touches: touches,
+      targetTouches: targetTouches,
+      changedTouches: changedTouches
+    })
+    canvas.dispatchEvent(canvasEvent)
   }
 }

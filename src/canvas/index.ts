@@ -52,27 +52,30 @@ export const initEditor = (src: string) => {
       rectY = params.y
       rectWidth = params.width
       rectHeight = params.height
-      drawImageWithScale(canvas, img, scale)
+      // drawImageWithScale(canvas, img, scale)
+      drawTrim(rectX, rectY, rectWidth, rectHeight)
     }
 
     const onAreaSelectZoom = (params: ZoomParams) => {
-      const { scale } = params
-      drawImageWithScale(canvas, img, scale)
+      // const { scale } = params
+      scale = params.scale
+      // drawImageWithScale(canvas, img, scale)
+      drawTrim(rectX, rectY, rectWidth, rectHeight)
     }
 
-    // const areaSelect = new AreaSelect(
-    //   document.querySelector('.area-select-box'),
-    //   {
-    //     x: rectX,
-    //     y: rectY,
-    //     width: rectWidth,
-    //     height: rectHeight
-    //   }
-    // )
+    const areaSelect = new AreaSelect(
+      document.querySelector('.area-select-box'),
+      {
+        x: rectX,
+        y: rectY,
+        width: rectWidth,
+        height: rectHeight
+      }
+    )
 
-    // areaSelect.on('change', onAreaSelectChange)
-    // areaSelect.on('afterChange', onAreaSelectChange)
-    // areaSelect.on('zoom', onAreaSelectZoom)
+    areaSelect.on('change', onAreaSelectChange)
+    areaSelect.on('afterChange', onAreaSelectChange)
+    areaSelect.on('zoom', onAreaSelectZoom)
   }
 
   img.crossOrigin = 'anonymous'
@@ -280,6 +283,29 @@ const onTouchEnd = (event: TouchEvent) => {
   isDragging = false
 }
 
+const onDoneBtnClick = (canvas: HTMLCanvasElement) => {
+  // 裁剪矩形区域的图片
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const imageData = ctx.getImageData(rectX, rectY, rectWidth, rectHeight)
+
+  // 创建新的 Canvas 用于显示裁剪后的图片
+  const clippedCanvas = document.createElement('canvas')
+  clippedCanvas.width = rectWidth
+  clippedCanvas.height = rectHeight
+  const clippedCtx = clippedCanvas.getContext('2d')
+
+  // 在新的 Canvas 上绘制裁剪后的图片
+  clippedCtx?.putImageData(imageData, 0, 0)
+
+  const aLink = document.createElement('a')
+  aLink.download = 'gulf.jpeg'
+  aLink.href = clippedCanvas.toDataURL()
+  document.body.appendChild(aLink)
+  aLink.click()
+  aLink.remove()
+}
+
 /**
  * 注册事件监听器
  * @param canvas canvas 对象
@@ -290,4 +316,7 @@ const initEvents = (canvas: HTMLCanvasElement) => {
   canvas.addEventListener('touchstart', onTouchStart, { passive: false })
   canvas.addEventListener('touchmove', onTouchMove, { passive: false })
   canvas.addEventListener('touchend', onTouchEnd, { passive: false })
+
+  const doneBtn = document.querySelector('.trim-nav-done')
+  doneBtn?.addEventListener('click', () => onDoneBtnClick(canvas))
 }
