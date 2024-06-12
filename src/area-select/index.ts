@@ -1,7 +1,14 @@
-import { Options, EventName, CallbackMap, Callback, Params } from './base'
+import {
+  Options,
+  EventName,
+  CallbackMap,
+  Callback,
+  Params,
+  ZoomParams
+} from './base'
 import { warn, throttle } from '@src/utils'
 
-export { Params } from './base'
+export { Params, ZoomParams } from './base'
 
 export class AreaSelect {
   public rect
@@ -13,10 +20,13 @@ export class AreaSelect {
     minWidth: 80,
     minHeight: 60
   }
-  private isResizing: boolean = false
+  private isResizing = false
+  private scale = 1
   private callbackMap: CallbackMap = {
     afterChange: [],
-    change: []
+    change: [],
+    zoom: [],
+    move: []
   }
 
   constructor (el: HTMLElement | null, options: Options) {
@@ -43,12 +53,18 @@ export class AreaSelect {
    * @param eventName
    * @param callback
    */
-  public on (eventName: EventName, callback: Callback) {
-    this.callbackMap[eventName].push(callback)
+  public on<T extends Params | ZoomParams> (
+    eventName: EventName,
+    callback: Callback<T>
+  ) {
+    this.callbackMap[eventName].push(callback as Callback<unknown>)
   }
 
-  private trigger (eventName: EventName, params: Params) {
-    const callbacks = this.callbackMap[eventName]
+  private trigger<T extends Params | ZoomParams> (
+    eventName: EventName,
+    params: T
+  ) {
+    const callbacks = this.callbackMap[eventName] as Callback<T>[]
     callbacks.forEach((cb) => cb(params))
   }
 
@@ -72,6 +88,7 @@ export class AreaSelect {
     )
     this.rect.addEventListener('touchend', this.onTouchEnd.bind(this))
     this.rect.addEventListener('touchcancel', this.onTouchCancel.bind(this))
+    this.rect.addEventListener('wheel', this.onWheel.bind(this))
   }
 
   private onTouchStart (event: TouchEvent) {
@@ -80,6 +97,7 @@ export class AreaSelect {
     this.isResizing = true
   }
 
+  // 监听触摸移动
   private onTouchMove (event: TouchEvent) {
     const { classList } = event.target as HTMLElement
     if (!classList.contains('drag-button')) return
@@ -253,4 +271,34 @@ export class AreaSelect {
   }
 
   private getMinRect () {}
+
+  // 检查坐标是否在矩形区域内
+  private checkInRect (x: number, y: number) {
+    if (
+      x < this.options.x ||
+      x > this.options.x + this.options.width ||
+      y < this.options.y ||
+      y > this.options.y + this.options.height
+    ) {
+      return false
+    }
+
+    return true
+  }
+
+  private onWheel (event: WheelEvent) {
+    event.preventDefault()
+
+    const { classList } = event.target as HTMLElement
+    if (classList.contains('drag-button')) return
+    if (!event.deltaY || !event.ctrlKey) return
+
+    this.scale += event.deltaY * -0.01
+
+    // Restrict scale
+    const minScale = 0.125
+    const maxScale = 4
+    this.scale = Math.min(Math.max(minScale, this.scale), maxScale)
+    this.trigger('zoom', { scale: this.scale })
+  }
 }

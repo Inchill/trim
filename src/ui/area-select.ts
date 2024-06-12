@@ -7,4 +7,4 @@ export default () => `
             <div class="drag-button drag-button-left"></div>
         </div>
     </div>
-`;
+`

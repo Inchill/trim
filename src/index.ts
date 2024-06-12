@@ -1,5 +1,5 @@
 import { IOptions } from 'types'
-import { drawImage } from './canvas'
+import { initEditor } from './canvas'
 import { warn } from './utils'
 import { createTrimImageEditorUI } from './ui'
 import './css/index.styl'
@@ -23,8 +23,8 @@ export const init = (options: IOptions) => {
   }
 
   el.innerHTML = createTrimImageEditorUI()
-  drawImage(src)
+  initEditor(src)
   setTimeout(hideLoading, 1000)
 
-  window.addEventListener('resize', () => drawImage(src))
+  window.addEventListener('resize', () => initEditor(src))
 }

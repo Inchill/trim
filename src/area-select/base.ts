@@ -17,19 +17,36 @@ export interface Params {
   height: number;
 }
 
+export interface ZoomParams {
+  scale: number;
+}
+
+export interface MoveParams {
+  x: number;
+  y: number;
+}
+
 /**
  * 事件名称
  */
-export type EventName = 'afterChange' | 'change';
+export type EventName = 'afterChange' | 'change' | 'zoom' | 'move';
 
 /**
  * 回调函数
  */
-export type Callback = (params: Params) => void;
+export type Callback<T> = (params: T) => void;
+
+/**
+ * 缩放回调函数
+ */
+export type ZoomCallback = (params: ZoomParams) => void;
 
 /**
  * 事件注册表
  */
 export type CallbackMap = {
-  [key in EventName]: Callback[];
+  afterChange: Callback<Params>[];
+  change: Callback<Params>[];
+  zoom: Callback<ZoomParams>[];
+  move: Callback<MoveParams>[];
 };
