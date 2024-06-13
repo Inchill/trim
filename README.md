@@ -2,6 +2,10 @@
 
 🚀一款基于 canvas 的图片编辑器。
 
+## Example
+
+![example](/public/example.png)
+
 ## 功能
 
 - 支持裁剪和调整大小

@@ -13,6 +13,8 @@ export { Params, ZoomParams } from './base'
 
 const minX = 10 // 最小横坐标
 const maxX = window.innerWidth - 10 // 最大横坐标
+const minY = 200 // 最小纵坐标
+const maxY = window.innerHeight - 200 // 最大纵坐标
 
 export class AreaSelect {
   public rect
@@ -188,8 +190,41 @@ export class AreaSelect {
 
     // Ensure the dot position is within the min boundaries
     if (newX < minX) return
+    if (newY < Math.max(minY, this.imageInfo.y)) return
 
     this.updateRect(newX, newY, newWidth, newHeight)
+  }
+
+  // 右上角
+  private resizeRight (
+    clientX: number,
+    clientY: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    const { minWidth = 80, minHeight = 60 } = this.options
+    const deltaX = clientX - (this.options.x + this.options.width)
+    let deltaY = clientY - this.options.y
+    let newWidth = this.options.width + deltaX
+    let newHeight = this.options.height - deltaY
+    let newY = clientY
+
+    if (newWidth < minWidth) {
+      newWidth = minWidth
+    }
+    if (newHeight < minHeight) {
+      newHeight = minHeight
+      deltaY = this.options.height - minHeight
+      newY = this.options.y + deltaY
+    }
+
+    // Ensure the dot position is within the min boundaries
+    if (x + newWidth > maxX) return
+    if (newY < Math.max(minY, this.imageInfo.y)) return
+
+    this.updateRect(x, newY, newWidth, newHeight)
   }
 
   // 右下角
@@ -216,6 +251,11 @@ export class AreaSelect {
 
     // Ensure the dot position is within the min boundaries
     if (x + newWidth > maxX) return
+    if (
+      y + newHeight >
+      Math.min(maxY, this.imageInfo.y + this.imageInfo.height)
+    )
+      return
 
     this.updateRect(x, y, newWidth, newHeight)
   }
@@ -253,39 +293,13 @@ export class AreaSelect {
 
     // Ensure the dot position is within the min boundaries
     if (newX < minX) return
+    if (
+      y + newHeight >
+      Math.min(maxY, this.imageInfo.y + this.imageInfo.height)
+    )
+      return
 
     this.updateRect(newX, newY, newWidth, newHeight)
-  }
-
-  // 右上角
-  private resizeRight (
-    clientX: number,
-    clientY: number,
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ) {
-    const { minWidth = 80, minHeight = 60 } = this.options
-    const deltaX = clientX - (this.options.x + this.options.width)
-    let deltaY = clientY - this.options.y
-    let newWidth = this.options.width + deltaX
-    let newHeight = this.options.height - deltaY
-    let newY = clientY
-
-    if (newWidth < minWidth) {
-      newWidth = minWidth
-    }
-    if (newHeight < minHeight) {
-      newHeight = minHeight
-      deltaY = this.options.height - minHeight
-      newY = this.options.y + deltaY
-    }
-
-    // Ensure the dot position is within the min boundaries
-    if (x + newWidth > maxX) return
-
-    this.updateRect(x, newY, newWidth, newHeight)
   }
 
   private updateRect (
