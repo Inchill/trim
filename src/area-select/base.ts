@@ -10,6 +10,16 @@ export interface Options {
   minHeight?: number;
 }
 
+/**
+ * 画布图片信息
+ */
+export interface CanvasImage {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface Params {
   x: number;
   y: number;

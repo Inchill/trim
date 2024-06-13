@@ -4,11 +4,15 @@ import {
   CallbackMap,
   Callback,
   Params,
-  ZoomParams
+  ZoomParams,
+  CanvasImage
 } from './base'
 import { warn, throttle } from '@src/utils'
 
 export { Params, ZoomParams } from './base'
+
+const minX = 10 // 最小横坐标
+const maxX = window.innerWidth - 10 // 最大横坐标
 
 export class AreaSelect {
   public rect
@@ -27,6 +31,13 @@ export class AreaSelect {
     change: [],
     zoom: [],
     move: []
+  }
+  // 画布图片坐标&宽高信息
+  private imageInfo: CanvasImage = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0
   }
 
   constructor (el: HTMLElement | null, options: Options) {
@@ -163,6 +174,7 @@ export class AreaSelect {
     let newX = clientX
     let newY = clientY
 
+    // 检查是否最小
     if (newWidth < minWidth) {
       newWidth = minWidth
       deltaX = this.options.width - minWidth
@@ -173,6 +185,9 @@ export class AreaSelect {
       deltaY = this.options.height - minHeight
       newY = this.options.y + deltaY
     }
+
+    // Ensure the dot position is within the min boundaries
+    if (newX < minX) return
 
     this.updateRect(newX, newY, newWidth, newHeight)
   }
@@ -198,6 +213,9 @@ export class AreaSelect {
     if (newHeight < minHeight) {
       newHeight = minHeight
     }
+
+    // Ensure the dot position is within the min boundaries
+    if (x + newWidth > maxX) return
 
     this.updateRect(x, y, newWidth, newHeight)
   }
@@ -233,6 +251,9 @@ export class AreaSelect {
       }
     }
 
+    // Ensure the dot position is within the min boundaries
+    if (newX < minX) return
+
     this.updateRect(newX, newY, newWidth, newHeight)
   }
 
@@ -260,6 +281,9 @@ export class AreaSelect {
       deltaY = this.options.height - minHeight
       newY = this.options.y + deltaY
     }
+
+    // Ensure the dot position is within the min boundaries
+    if (x + newWidth > maxX) return
 
     this.updateRect(x, newY, newWidth, newHeight)
   }
@@ -379,5 +403,9 @@ export class AreaSelect {
       changedTouches: changedTouches
     })
     canvas.dispatchEvent(canvasEvent)
+  }
+
+  public updateCanvasImageInfo (info: CanvasImage) {
+    this.imageInfo = { ...info }
   }
 }

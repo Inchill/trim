@@ -15,6 +15,8 @@ let isDragging = false
 let lastX = 0
 let lastY = 0
 
+let areaSelect: AreaSelect
+
 export const initEditor = (src: string) => {
   const canvas = document.querySelector('.trim-edit-canvas')
     ?.children[0] as HTMLCanvasElement
@@ -63,15 +65,12 @@ export const initEditor = (src: string) => {
       drawTrim(rectX, rectY, rectWidth, rectHeight)
     }
 
-    const areaSelect = new AreaSelect(
-      document.querySelector('.area-select-box'),
-      {
-        x: rectX,
-        y: rectY,
-        width: rectWidth,
-        height: rectHeight
-      }
-    )
+    areaSelect = new AreaSelect(document.querySelector('.area-select-box'), {
+      x: rectX,
+      y: rectY,
+      width: rectWidth,
+      height: rectHeight
+    })
 
     areaSelect.on('change', onAreaSelectChange)
     areaSelect.on('afterChange', onAreaSelectChange)
@@ -133,6 +132,16 @@ function drawImageWithScale (
   // 绘制图片
   ctx.drawImage(image, dx, dy, imgWidth, imgHeight)
 
+  // 更新拖拽区域缓存的图片信息，用以限制拖拽区域
+  if (areaSelect) {
+    areaSelect.updateCanvasImageInfo({
+      x: dx,
+      y: dy,
+      width: imgWidth,
+      height: imgHeight
+    })
+  }
+
   // 获取矩形区域图像数据(TODO: 频繁读取会造成性能问题，最好是在矩形区域再次绘制选定图片区域)
   // const imageData = ctx.getImageData(rectX, rectY, rectWidth, rectHeight)
 
@@ -179,10 +188,10 @@ export const drawTrim = (
   ctx.clearRect(startX, startY, width, height)
 
   // 绘制4个边框像素点并保存坐标信息以及事件参数
-  drawTrimCorners(startX, startY, width, height, ctx)
+  // drawTrimCorners(startX, startY, width, height, ctx)
 
   // 再次使用drawImage将图片绘制到蒙层下方
-  ctx.save()
+  // ctx.save()
   ctx.globalCompositeOperation = 'destination-over'
   drawImageWithScale(canvas, img, scale)
 
@@ -299,7 +308,7 @@ const onDoneBtnClick = (canvas: HTMLCanvasElement) => {
   clippedCtx?.putImageData(imageData, 0, 0)
 
   const aLink = document.createElement('a')
-  aLink.download = 'gulf.jpeg'
+  aLink.download = 'landscape.jpg'
   aLink.href = clippedCanvas.toDataURL()
   document.body.appendChild(aLink)
   aLink.click()
