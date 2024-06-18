@@ -108,6 +108,7 @@ export class AreaSelect {
       return
     }
     this.isResizing = true
+    this.showGridLine()
   }
 
   // 监听触摸移动
@@ -142,6 +143,7 @@ export class AreaSelect {
     }
 
     this.isResizing = false
+    this.hideGridLine()
     const { width, height, x, y } = this.rect!.getBoundingClientRect()
     this.options = { ...this.options, x, y, width, height }
     this.trigger('afterChange', { ...this.options })
@@ -155,6 +157,7 @@ export class AreaSelect {
     }
 
     this.isResizing = false
+    this.hideGridLine()
     const { width, height, x, y } = this.rect!.getBoundingClientRect()
     this.options = { ...this.options, x, y, width, height }
   }
@@ -421,5 +424,15 @@ export class AreaSelect {
 
   public updateCanvasImageInfo (info: CanvasImage) {
     this.imageInfo = { ...info }
+  }
+
+  private showGridLine () {
+    const ele = document.querySelector('.area-select-box') as HTMLElement
+    ele.classList.add('grid-line')
+  }
+
+  private hideGridLine () {
+    const ele = document.querySelector('.area-select-box') as HTMLElement
+    ele.classList.remove('grid-line')
   }
 }

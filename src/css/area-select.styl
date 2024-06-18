@@ -5,6 +5,30 @@
     z-index 1
     cursor nwse-resize /* 指定鼠标样式为可改变大小的角落 */
 
+    &.grid-line
+        &::before
+            content: " "
+            box-sizing: border-box
+            position: absolute
+            border: 1px solid hsla(0, 0%, 100%, .5)
+            top: 0
+            bottom: 0
+            left: 33.33%
+            right: 33.33%
+            border-top: 0
+            border-bottom: 0
+        &::after
+            content: " "
+            box-sizing: border-box
+            position: absolute
+            border: 1px solid hsla(0, 0%, 100%, .5)
+            top: 33.33%
+            bottom: 33.33%
+            left: 0
+            right: 0
+            border-left: 0
+            border-right: 0
+
 .drag-button
     position absolute
     width 20px
