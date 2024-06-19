@@ -289,6 +289,7 @@ const onTouchMove = (event: TouchEvent) => {
 }
 
 const onTouchEnd = (event: TouchEvent) => {
+  event.preventDefault()
   isDragging = false
 }
 

@@ -102,6 +102,7 @@ export class AreaSelect {
   }
 
   private onTouchStart (event: TouchEvent) {
+    event.preventDefault()
     const { classList } = event.target as HTMLElement
     if (!classList.contains('drag-button')) {
       this.dispatchEventToCanvas(event)
@@ -113,6 +114,7 @@ export class AreaSelect {
 
   // 监听触摸移动
   private onTouchMove (event: TouchEvent) {
+    event.preventDefault()
     const { classList } = event.target as HTMLElement
     // 矩形区域移动或者缩放事件透传
     if (!classList.contains('drag-button')) {
@@ -136,6 +138,7 @@ export class AreaSelect {
   }
 
   private onTouchEnd (event: TouchEvent) {
+    event.preventDefault()
     const { classList } = event.target as HTMLElement
     if (!classList.contains('drag-button')) {
       this.dispatchEventToCanvas(event)
@@ -150,6 +153,7 @@ export class AreaSelect {
   }
 
   private onTouchCancel (event: TouchEvent) {
+    event.preventDefault()
     const { classList } = event.target as HTMLElement
     if (!classList.contains('drag-button')) {
       this.dispatchEventToCanvas(event)
