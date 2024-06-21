@@ -1,12 +1,12 @@
-import typescript from 'rollup-plugin-typescript2';
-import babel from '@rollup/plugin-babel';
-import postcss from 'rollup-plugin-postcss';
-import terser from '@rollup/plugin-terser';
-import livereload from 'rollup-plugin-livereload';
-import serve from 'rollup-plugin-serve';
+import typescript from 'rollup-plugin-typescript2'
+import babel from '@rollup/plugin-babel'
+import postcss from 'rollup-plugin-postcss'
+import terser from '@rollup/plugin-terser'
+import livereload from 'rollup-plugin-livereload'
+import serve from 'rollup-plugin-serve'
 
-let firstBuild = true;
-const isDev = process.env.NODE_ENV !== 'production';
+let firstBuild = true
+const isDev = process.env.NODE_ENV !== 'production'
 
 const devPlugins = [
   livereload('dist'),
@@ -16,20 +16,20 @@ const devPlugins = [
     contentBase: ['.', 'src', 'public'],
     host: 'localhost',
     port: 8680,
-    onOpen() {
+    onOpen () {
       if (firstBuild) {
-        firstBuild = false;
+        firstBuild = false
       }
     }
   })
-];
+]
 
 const prodPlugins = [
   terser({
     compress: true,
     mangle: true
   })
-];
+]
 
 export default {
   input: 'src/index.ts',
@@ -51,4 +51,4 @@ export default {
     ...(isDev ? [] : prodPlugins),
     ...(isDev ? devPlugins : [])
   ]
-};
+}
